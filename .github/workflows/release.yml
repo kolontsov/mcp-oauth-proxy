@@ -1,0 +1,62 @@
+---
+name: Release
+
+'on':
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Unit tests
+        run: go test ./...
+
+      - name: Build all targets
+        run: |
+          mkdir -p dist
+          LDFLAGS="-s -w -X main.version=${GITHUB_REF_NAME}"
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+            go build -trimpath -ldflags "$LDFLAGS" -o dist/mcp-oauth-proxy-linux-amd64 .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 \
+            go build -trimpath -ldflags "$LDFLAGS" -o dist/mcp-oauth-proxy-linux-arm64 .
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
+            go build -trimpath -ldflags "$LDFLAGS" -o dist/mcp-oauth-proxy-darwin-amd64 .
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 \
+            go build -trimpath -ldflags "$LDFLAGS" -o dist/mcp-oauth-proxy-darwin-arm64 .
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum \
+            mcp-oauth-proxy-linux-amd64 \
+            mcp-oauth-proxy-linux-arm64 \
+            mcp-oauth-proxy-darwin-amd64 \
+            mcp-oauth-proxy-darwin-arm64 \
+            > SHA256SUMS
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            dist/mcp-oauth-proxy-linux-amd64
+            dist/mcp-oauth-proxy-linux-arm64
+            dist/mcp-oauth-proxy-darwin-amd64
+            dist/mcp-oauth-proxy-darwin-arm64
+            dist/SHA256SUMS
+          generate_release_notes: true

@@ -1,0 +1,10 @@
+# Built binary
+/mcp-oauth-proxy
+
+# Editor / tooling
+/.claude/
+
+# Local config and secrets
+/config.json
+/session.json
+/session.json.tmp

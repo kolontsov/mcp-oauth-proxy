@@ -1,0 +1,16 @@
+{
+  "client_id": "YOUR_OAUTH_CLIENT_ID",
+  "mcp_url": "https://api.example.com/mcp/v1/YOUR-SERVER",
+  "inbound_token": "pick-a-long-random-secret",
+
+  "authorize_url": "",
+  "token_url": "",
+  "scopes": "",
+  "resource": "",
+
+  "redirect_port": 8585,
+  "redirect_path": "/callback",
+  "listen_addr": "127.0.0.1:9000",
+
+  "quirks": []
+}
